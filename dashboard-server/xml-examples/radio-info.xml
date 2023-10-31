@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RadioInfo>
+  <app>N1MM</app>
+  <StationName>CW-80m</StationName>
+  <RadioNr>1</RadioNr>
+  <Freq>352211</Freq>
+  <TXFreq>352211</TXFreq>
+  <Mode>CW</Mode>
+  <OpCall>W1ABC</OpCall>
+  <IsRunning>False</IsRunning>
+  <FocusEntry>204626</FocusEntry>
+  <EntryWindowHwnd>275678</EntryWindowHwnd>
+  <Antenna>8</Antenna>
+  <Rotors/>
+  <FocusRadioNr>1</FocusRadioNr>
+  <IsStereo>False</IsStereo>
+  <IsSplit>False</IsSplit>
+  <ActiveRadioNr>1</ActiveRadioNr>
+  <IsTransmitting>False</IsTransmitting>
+  <FunctionKeyCaption/>
+  <RadioName/>
+  <AuxAntSelected>-1</AuxAntSelected>
+  <AuxAntSelectedName/>
+  <IsConnected/>
+</RadioInfo>

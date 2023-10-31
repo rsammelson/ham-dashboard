@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<dynamicresults>
+  <contest>ARRL-FIELD-DAY</contest>
+  <call>K8UT</call>
+  <ops>VA5DX</ops>
+  <class power="HIGH" assisted="ASSISTED" transmitter="UNLIMITED" ops="MULTI-OP" bands="ALL" mode="MIXED" overlay="N/A"> </class>
+  <club/>
+  <qth>
+    <dxcccountry>K</dxcccountry>
+    <cqzone>4</cqzone>
+    <iaruzone>8</iaruzone>
+    <arrlsection>MI</arrlsection>
+    <stprvoth>MI</stprvoth>
+    <grid6>EN82BK</grid6>
+  </qth>
+  <breakdown>
+    <qso band="20" mode="CW">156</qso>
+    <point band="20" mode="CW">312</point>
+    <qso band="20" mode="ALL">15</qso>
+    <point band="20" mode="ALL">30</point>
+    <qso band="20" mode="PH">385</qso>
+    <point band="20" mode="PH">384</point>
+    <qso band="15" mode="CW">19</qso>
+    <point band="15" mode="CW">38</point>
+    <qso band="15" mode="ALL">14</qso>
+    <point band="15" mode="ALL">28</point>
+    <qso band="15" mode="PH">30</qso>
+    <point band="15" mode="PH">30</point>
+    <qso band="10" mode="CW">6</qso>
+    <point band="10" mode="CW">12</point>
+    <qso band="10" mode="ALL">3</qso>
+    <point band="10" mode="ALL">6</point>
+    <qso band="80" mode="CW">24</qso>
+    <point band="80" mode="CW">48</point>
+    <qso band="80" mode="ALL">75</qso>
+    <point band="80" mode="ALL">150</point>
+    <qso band="80" mode="PH">136</qso>
+    <point band="80" mode="PH">136</point>
+    <qso band="0.7" mode="PH">l</qso>
+    <point band="0.7" mode="PH">2</point>
+    <qso band="6" mode="CW">l</qso>
+    <point band="6" mode="CW">2</point>
+    <qso band="6" mode="ALL">54</qso>
+    <point band="6" mode="ALL">108</point>
+    <qso band="6" mode="PH">9</qso>
+    <point band="6" mode="PH">9</point>
+    <qso band="40" mode="CW">625</qso>
+    <point band="40" mode="CW">1250</point>
+    <qso band="40" mode="ALL">2</qso>
+    <point band="40" mode="ALL">4</point>
+    <qso band="40" mode="PH">746</qso>
+    <point band="40" mode="PH">746</point>
+    <qso band="total" mode="ALL">2301</qso>
+    <point band="total" mode="ALL">3295</point>
+  </breakdown>
+  <score>3295</score>
+  <timestamp>2020-01-17 17:33:37</timestamp>
+</dynamicresults>
