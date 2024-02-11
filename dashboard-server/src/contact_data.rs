@@ -58,7 +58,7 @@ impl ContactData {
     async fn timestamp(&self) -> String {
         self.timestamp
             .format(time::macros::format_description!(
-                "[year]-[month]-[day] [hour]:[minute]:[second]"
+                "[year]-[month]-[day]T[hour]:[minute]:[second]Z"
             ))
             .unwrap()
     }

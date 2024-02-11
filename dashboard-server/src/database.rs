@@ -4,6 +4,7 @@ use tokio::sync::broadcast;
 use diesel::{prelude::*, r2d2};
 
 use crate::{
+    activity,
     contact_data::{self, ContactData},
     hamqth, prefix,
 };
@@ -172,6 +173,7 @@ impl Database {
             .await
             .is_ok_and(|v| v)
         {
+            log::debug!("Failing over to using prefix for {}", data.recv_callsign);
             self.get_location_from_prefix(data).await
         } else {
             Ok(())
@@ -183,7 +185,7 @@ impl Database {
         data: &ContactData,
         hamqth_session: &hamqth::Session,
     ) -> anyhow::Result<bool> {
-        log::debug!("Fetching location for ADIF entry: {}", data.recv_callsign);
+        log::debug!("Fetching location from HamQTH for {}", data.recv_callsign);
         let location = hamqth_session.query(&data.recv_callsign).await?;
         match location {
             Some(l) => {
@@ -217,6 +219,13 @@ impl Database {
         } else {
             Ok(())
         }
+    }
+
+    pub async fn contacts(&self) -> anyhow::Result<Vec<ContactData>> {
+        use crate::schema::contacts::dsl::*;
+        Ok(contacts
+            .order(timestamp.asc())
+            .load(&mut self.pool.get()?)?)
     }
 
     pub async fn most_recent(

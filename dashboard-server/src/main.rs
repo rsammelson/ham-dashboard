@@ -1,7 +1,8 @@
 #![allow(dead_code, internal_features)]
-#![feature(rustc_attrs)]
+#![feature(rustc_attrs, iter_map_windows)]
 #![allow(dead_code, unused)]
 
+mod activity;
 mod adif;
 mod contact_data;
 mod database;
@@ -24,7 +25,16 @@ async fn main() -> anyhow::Result<()> {
         std::env::var("HAMQTH_USERNAME")?,
         std::env::var("HAMQTH_PASSWORD")?,
     )
-    .await?;
+    .await
+    .map_err(|e| {
+        println!("HamQTH error: {}", e);
+        ()
+    })
+    .ok();
+
+    if hamqth_session.is_none() {
+        println!("Could not log in to HamQTH");
+    }
 
     let adif_records = match &std::fs::read_to_string("W9YB.adi") {
         Ok(text) => adif::read_adif(text)?
@@ -42,17 +52,17 @@ async fn main() -> anyhow::Result<()> {
 
     let db = database::Database::new(pool).await?;
 
-    let mut adif_tasks = tokio::task::JoinSet::new();
-    for d in adif_records {
-        let db = db.clone();
-        let hamqth_session = hamqth_session.clone();
-        adif_tasks.spawn(async move {
-            db.update_and_fetch_location(&hamqth_session, &d, false)
-                .await
-        });
-    }
-    while let Some(res) = adif_tasks.join_next().await {
-        res??;
+    if let Some(ref session) = hamqth_session {
+        let mut adif_tasks = tokio::task::JoinSet::new();
+        for d in adif_records {
+            let db = db.clone();
+            let session = session.clone();
+            adif_tasks
+                .spawn(async move { db.update_and_fetch_location(&session, &d, false).await });
+        }
+        while let Some(res) = adif_tasks.join_next().await {
+            res??;
+        }
     }
 
     let mut tasks = tokio::task::JoinSet::new();
