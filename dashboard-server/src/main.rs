@@ -26,12 +26,13 @@ async fn main() -> anyhow::Result<()> {
     )
     .await?;
 
-    let adif_data = &std::fs::read_to_string("W9YB.adi")?;
-    let adif_records = adif::read_adif(adif_data)?
-        .map(|r| r.map(|r| contact_data::ContactData::from(r)))
-        .collect::<Result<Vec<_>, _>>()?;
-    println!("{}", adif_records.len());
-    println!("{:?}", adif_records[0]);
+    let adif_records = match &std::fs::read_to_string("W9YB.adi") {
+        Ok(text) => adif::read_adif(text)?
+            .map(|r| r.map(|r| contact_data::ContactData::from(r)))
+            .collect::<Result<Vec<_>, _>>()?,
+        Err(_) => Vec::new(),
+    };
+    println!("ADIF record count: {}", adif_records.len());
 
     let manager = diesel::r2d2::ConnectionManager::<SqliteConnection>::new("db.sql");
     let pool = diesel::r2d2::Pool::builder()

@@ -3,9 +3,18 @@ import { APIContext } from "../_layout";
 import { gql, useQuery } from "@apollo/client";
 import { useContext, useEffect } from "react";
 import { StyleSheet } from "react-native";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  Marker,
+  Polyline,
+  Popup,
+  TileLayer,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
+import "leaflet-arc";
 import "leaflet/dist/leaflet.css";
+import { useLeafletContext } from "@react-leaflet/core";
 
 const LATEST_QUERY = gql`
   query {
@@ -50,7 +59,26 @@ const LOCATION_QUERY = gql`
   }
 `;
 
-const dot_icon = L.icon({ iconUrl: "/assets/images/circle-icon.png", iconSize: [4, 4] });
+const dot_icon = L.icon({
+  iconUrl: "/assets/images/circle-icon.png",
+  iconSize: [4, 4],
+});
+
+function Arc({ start, end }: { start: Array<float>; end: Array<float> }) {
+  const context = useLeafletContext();
+
+  useEffect(() => {
+    const arc = L.Polyline.Arc(start, end, { vertices: 1000, offset: -1 });
+    const container = context.layerContainer || context.map;
+    container.addLayer(arc);
+
+    return () => {
+      container.removeLayer(arc);
+    };
+  });
+
+  return null;
+}
 
 export default function TabOneScreen() {
   // <View
@@ -149,11 +177,19 @@ function MapMarkers() {
   if (loading) return null;
   if (error) return null;
 
-  console.log(data.entries);
+  console.log("Entries:", data.entries);
+
+  if (!data?.entries.length) return null;
+
+  const coords = data.entries.filter((i: any) => i.latitude);
+  const last = coords.slice(-1)[0];
+
+  console.log("Last:", last);
 
   return (
     <div>
-      {data.entries.filter((i: any) => i.latitude).filter((i: any) => i.operator == "KD9YWS").map((i: any) => get_marker(i))}
+      {coords.map((i: any) => get_marker(i))}
+      <Arc start={[40.42, -86.77]} end={[last.latitude, last.longitude]} />
     </div>
   );
 }
@@ -161,9 +197,14 @@ function MapMarkers() {
 function get_marker(entry: any) {
   console.log(entry, dot_icon);
   return (
-    <Marker position={[entry.latitude, entry.longitude]} icon={dot_icon} key={entry.id}>
+    <Marker
+      position={[entry.latitude, entry.longitude]}
+      icon={dot_icon}
+      key={entry.id}
+    >
       <Popup>
-        {entry.recvCallsign} - {entry.operator} - {entry.freqRx / 1000} - {entry.locationSource}
+        {entry.recvCallsign} - {entry.operator} - {entry.freqRx / 1000} -{" "}
+        {entry.locationSource}
       </Popup>
     </Marker>
   );

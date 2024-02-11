@@ -1,5 +1,6 @@
 import datetime
 import readline
+import secrets
 import socket
 
 
@@ -52,7 +53,7 @@ contact_info = """<?xml version="1.0" encoding="utf-8"?>
   <NetBiosName/>
   <IsRunQSO>0</IsRunQSO>
   <StationName>CONTEST-PC</StationName>
-  <ID>f9ffac4fcd3e479ca86e137df1338531</ID>
+  <ID>{id}</ID>
   <IsClaimedQso>1</IsClaimedQso>
 </contactinfo>
 """
@@ -63,8 +64,9 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 def send(callsign):
     t = datetime.datetime.now(tz=datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
-    packet = contact_info.format(timestamp=t, callsign=callsign)
-    print(f"Sending QSO with {callsign} at {t}")
+    rand_id = secrets.token_hex(16)
+    packet = contact_info.format(timestamp=t, callsign=callsign, id=rand_id)
+    print(f"Sending QSO with {callsign} at {t} ({rand_id})")
     sock.sendto(str.encode(packet), (UDP_IP, UDP_PORT))
 
 
