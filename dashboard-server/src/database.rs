@@ -254,6 +254,22 @@ impl Database {
         Ok(expr.load(&mut self.pool.get()?)?)
     }
 
+    pub async fn count(&self, is_run: Option<bool>, op: Option<String>) -> anyhow::Result<u64> {
+        use crate::schema::contacts::dsl::*;
+        let mut expr = contacts.into_boxed();
+
+        if let Some(is_run) = is_run {
+            expr = expr.filter(is_run_qso.eq(is_run));
+        }
+
+        if let Some(op) = op {
+            expr = expr.filter(operator.eq(op));
+        }
+
+        let count: i64 = expr.count().first(&mut self.pool.get()?)?;
+        Ok(count.try_into()?)
+    }
+
     pub async fn watch_latest(&self) -> tokio::sync::broadcast::Receiver<Option<ContactData>> {
         self.last.read().await.sender.subscribe()
     }

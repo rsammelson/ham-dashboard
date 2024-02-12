@@ -57,6 +57,14 @@ impl Query {
         Ok(self.database.most_recent(None, None, None).await?)
     }
 
+    async fn contact_count(
+        &self,
+        is_run: Option<bool>,
+        operator: Option<String>,
+    ) -> async_graphql::Result<u64> {
+        Ok(self.database.count(is_run, operator).await?)
+    }
+
     async fn most_recent(
         &self,
         count: Option<u32>,
