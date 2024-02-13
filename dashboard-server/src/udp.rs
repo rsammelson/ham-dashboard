@@ -6,38 +6,52 @@ pub async fn udp_receiver(
     db: database::Database,
     hamqth_session: Option<hamqth::Session>,
 ) -> anyhow::Result<()> {
+    let db = Arc::new(db);
+    let hamqth_session = hamqth_session.map(|s| Arc::new(s));
     let socket = Arc::new(Mutex::new(std::net::UdpSocket::bind("0.0.0.0:12063")?));
-    let buffer = Arc::new(tokio::sync::Mutex::new([0u8; 4096]));
     loop {
-        match receive_udp(&db, hamqth_session.as_ref(), &socket, &buffer).await {
+        match receive_udp(db.clone(), hamqth_session.clone(), socket.clone()).await {
             Ok(_) => log::trace!("Successfully received UDP packet"),
             Err(e) => log::warn!("Error receiving UDP packet: {}", e),
         }
     }
 }
 
-async fn receive_udp<const N: usize>(
-    db: &database::Database,
-    hamqth_session: Option<&hamqth::Session>,
-    socket: &Arc<Mutex<std::net::UdpSocket>>,
-    buffer: &Arc<tokio::sync::Mutex<[u8; N]>>,
+async fn receive_udp(
+    db: Arc<database::Database>,
+    hamqth_session: Option<Arc<hamqth::Session>>,
+    socket: Arc<Mutex<std::net::UdpSocket>>,
 ) -> anyhow::Result<()> {
-    let len = {
-        let socket = socket.clone();
-        let buffer_ref = buffer.clone();
-        tokio::task::spawn_blocking(move || {
-            socket
-                .lock()
-                .unwrap()
-                .recv(&mut *buffer_ref.blocking_lock())
+    const N: usize = 8192;
+
+    let (data, len) = {
+        tokio::task::spawn_blocking(move || -> anyhow::Result<_> {
+            let mut data = Vec::new();
+            data.resize(N, 0);
+            let len = socket.try_lock().unwrap().recv(&mut data)?;
+            anyhow::ensure!(len < N);
+            data.resize(len, 0);
+            Ok((data, len))
         })
         .await??
     };
-    anyhow::ensure!(len < N);
 
-    let buffer = buffer.lock().await;
+    tokio::spawn(async move {
+        match process_udp(&db, hamqth_session.as_deref(), data).await {
+            Ok(_) => log::trace!("Successfully processed UDP packet"),
+            Err(e) => log::warn!("Error processing UDP packet: {}", e),
+        }
+    });
 
-    let xml = std::str::from_utf8(&buffer[0..len])?;
+    Ok(())
+}
+
+async fn process_udp(
+    db: &database::Database,
+    hamqth_session: Option<&hamqth::Session>,
+    data: Vec<u8>,
+) -> anyhow::Result<()> {
+    let xml = std::str::from_utf8(&data)?;
     log::debug!("Got UDP packet: {}", xml);
 
     let data: xml::UdpData = quick_xml::de::from_str(xml)?;
